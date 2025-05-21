@@ -1,12 +1,17 @@
-import {
-  default as makeWASocket,
+import pkg from 'baileys';
+const {
+  default: makeWASocket,
   DisconnectReason,
   useSingleFileAuthState
-} from 'baileys';
+} = pkg;
 
 import Pino from 'pino';
-import { readFileSync } from 'fs';
-import autoReplies from './autoReplies.json' assert { type: "json" };
+import fs from 'fs';
+
+const { state, saveState } = useSingleFileAuthState('./auth_info.json');
+
+import autoReplies from './autoReplies.json' with { type: "json" };
+
 
 const { state, saveState } = useSingleFileAuthState('./auth_info.json');
 

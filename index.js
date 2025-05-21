@@ -2,26 +2,21 @@ const { default: makeWASocket, useSingleFileAuthState, DisconnectReason } = requ
 const Pino = require('pino');
 const fs = require('fs');
 
-// Load replies from a JSON file
-const autoReplies = JSON.parse(fs.readFileSync('./autoReplies.json', 'utf8'));
-
-// Load or create auth session
 const { state, saveState } = useSingleFileAuthState('./auth_info.json');
 
-// Create WhatsApp connection
 const sock = makeWASocket({
   auth: state,
   logger: Pino({ level: 'silent' }),
   printQRInTerminal: true,
 });
 
-// Save session on changes
 sock.ev.on('creds.update', saveState);
 
-// Auto-reply logic
+// Load auto replies from file
+const autoReplies = JSON.parse(fs.readFileSync('./autoReplies.json', 'utf8'));
+
 sock.ev.on('messages.upsert', async ({ messages, type }) => {
   if (type !== 'notify') return;
-
   const msg = messages[0];
   if (!msg.message || msg.key.fromMe) return;
 
@@ -30,6 +25,6 @@ sock.ev.on('messages.upsert', async ({ messages, type }) => {
 
   if (reply) {
     await sock.sendMessage(msg.key.remoteJid, { text: reply }, { quoted: msg });
-    console.log(`Auto-replied to: ${text}`);
+    console.log(`Auto-replied: "${text}" => "${reply}"`);
   }
 });
